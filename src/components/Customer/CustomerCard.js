@@ -4,8 +4,8 @@ import "./Customer.css"
 export const CustomerCard = ({ customer }) => (
   <section className="customer">
     <h3 className="customer__name">{customer.name}</h3>
-    <div className="customer__address">
-      <strong>Address:</strong> {customer.address}
+    <div className="customer__email">
+      <strong>Email:</strong> {customer.email}
     </div>
   </section>
 );

@@ -13,14 +13,14 @@ export const AnimalProvider = (props) => {
       .then(setAnimals);
   };
 
-const addAnimal = (animal) => {
-  return fetch("http://localhost:8088/animals", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(animal),
-  }).then((response) => response.json())
+  const addAnimal = (animal) => {
+    return fetch("http://localhost:8088/animals", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(animal),
+    }).then((response) => response.json())
 };
 
   /*
@@ -29,12 +29,20 @@ const addAnimal = (animal) => {
         and the `addAnimal` function as keys. This
         allows any child elements to access them.
     */
+
+  const getAnimalById = (id) => {
+    return fetch(
+      `http://localhost:8088/animals/${id}?_expand=location&_expand=customer`
+    ).then((res) => res.json());
+  };
+
   return (
     <AnimalContext.Provider
       value={{
         animals,
         getAnimals,
         addAnimal,
+        getAnimalById
       }}
     >
       {props.children}

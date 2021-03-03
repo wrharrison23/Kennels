@@ -29,12 +29,20 @@ export const EmployeeProvider = (props) => {
         and the `addEmployee` function as keys. This
         allows any child elements to access them.
     */
+
+    const getEmployeeById = (id) => {
+      return fetch(
+        `http://localhost:8088/employees/${id}?_expand=location`
+      ).then((res) => res.json());
+    };
+
   return (
     <EmployeeContext.Provider
       value={{
         employees,
         getEmployees,
         addEmployee,
+        getEmployeeById
       }}
     >
       {props.children}
