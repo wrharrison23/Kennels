@@ -1,101 +1,110 @@
 import React, { useContext, useEffect, useState } from "react";
-import { LocationContext } from "../location/LocationProvider";
-import "./Location.css";
-import { useHistory } from "react-router-dom";
+import { LocationContext } from "./LocationProvider";
+import { useHistory, useParams } from "react-router-dom";
 
 export const LocationForm = () => {
-  const { addLocation } = useContext(LocationContext);
-  const { locations, getLocations } = useContext(LocationContext);
+  const { addLocation, getLocationById, updateLocation, getLocations } = useContext(LocationContext);
 
-  /*
-    With React, we do not target the DOM with `document.querySelector()`. Instead, our return (render) reacts to state or props.
+  const [location, setLocation] = useState({});
 
-    Define the initial state of the form inputs with useState()
-    */
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [location, setLocation] = useState({
-    name: "",
-    address: ""
-  });
+  const { locationId } = useParams();
 
   const history = useHistory();
 
-  /*
-    Reach out to the world and get customers state
-    and locations state on initialization.
-    */
-  useEffect(() => {
-    getLocations();
-  }, []);
 
-  //when a field changes, update state. The return will re-render and display based on the values in state
-  //Controlled component
   const handleControlledInputChange = (event) => {
-    /* When changing a state object or array,
-      always create a copy, make changes, and then set state.*/
     const newLocation = { ...location };
-    /* Location is an object with properties.
-      Set the property to the new value
-      using object bracket notation. */
-    newLocation[event.target.id] = event.target.value;
+  
+    newLocation[event.target.name] = event.target.value;
 
     setLocation(newLocation);
   };
 
-  const handleClickSaveLocation = (event) => {
-    event.preventDefault(); //Prevents the browser from submitting the form
-
-    
-
-    const locationName = location.name
-    const locationAddress = location.address
-    if (locationName === null || locationAddress === null) {
-      window.alert("Please input a location");
+  const handleSaveLocation = () => {
+    if (location.name === null) {
+      window.alert("Please select a location");
     } else {
-      //invoke addLocation passing location as an argument.
-      //once complete, change the url and display the location list
-      addLocation(location).then(() => history.push("/locations"));
+      setIsLoading(true);
+      if (locationId) {
+        updateLocation({
+          id: location.id,
+          name: location.name,
+          address: location.address
+        }).then(() => history.push(`/locations/detail/${location.id}`));
+      } else {
+        addLocation({
+          name: location.name,
+          address: location.address
+        }).then(() => history.push("/locations"));
+      }
     }
   };
+
+
+    useEffect(() => {
+      getLocations()
+        .then(() => {
+          if (locationId) {
+            getLocationById(locationId).then((location) => {
+              setLocation(location);
+              setIsLoading(false);
+            });
+          } else {
+            setIsLoading(false);
+          }
+        });
+    }, []);
+
+
 
   return (
     <form className="locationForm">
       <h2 className="locationForm__title">New Location</h2>
       <fieldset>
         <div className="form-group">
-          <label htmlFor="name">Location name: </label>
+          <label htmlFor="locationName">Location name: </label>
           <input
             type="text"
-            id="name"
-            onChange={handleControlledInputChange}
+            id="locationName"
+            name="name"
             required
             autoFocus
             className="form-control"
             placeholder="Location name"
-            value={location.name}
+            onChange={handleControlledInputChange}
+            defaultValue={location.name}
           />
         </div>
       </fieldset>
-
       <fieldset>
         <div className="form-group">
           <label htmlFor="name">Location address: </label>
           <input
             type="text"
             id="address"
-            onChange={handleControlledInputChange}
+            name="address"
             required
             autoFocus
             className="form-control"
             placeholder="Location address"
-            value={location.address}
+            onChange={handleControlledInputChange}
+            defaultValue={location.address}
           />
         </div>
       </fieldset>
-
-      <button className="btn btn-primary" onClick={handleClickSaveLocation}>
-        Add Location
+      
+      <button
+        className="btn btn-primary"
+        disabled={isLoading}
+        onClick={(event) => {
+          event.preventDefault(); // Prevent browser from submitting the form and refreshing the page
+          handleSaveLocation();
+        }}
+      >
+        {location.id ? <>Save Location</> : <>Add Location</>}
       </button>
     </form>
   );
-};
+}

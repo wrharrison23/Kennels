@@ -43,6 +43,13 @@ export const LocationDetail = () => {
           }
         })}
       </div>
+      <button
+        onClick={() => {
+          history.push(`/locations/edit/${location.id}`);
+        }}
+      >
+        Edit
+      </button>
     </section>
   );
 };
